@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policy Management - eBay Side Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/session.js"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto max-w-7xl mt-8 bg-white p-6 rounded-lg shadow-lg">
+    <header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+      <h1 class="text-3xl font-bold text-blue-600">Policy Management</h1>
+      <nav class="flex gap-3">
+        <a href="/products.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Products</a>
+        <a href="/categories.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Categories</a>
+        <a href="/policies.html" class="bg-blue-600 text-white px-3 py-2 rounded">Policies</a>
+        <a href="/orders.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Orders</a>
+        <a href="/" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Logout</a>
+      </nav>
+    </header>
+
+    <div class="mb-6 flex justify-between items-center">
+      <div class="flex gap-2">
+        <button class="tab-btn px-6 py-3 cursor-pointer bg-blue-600 text-white rounded-t-lg font-semibold transition"
+          data-tab="fulfillment">
+          🚚 Shipping (Fulfillment)
+        </button>
+        <button
+          class="tab-btn px-6 py-3 cursor-pointer bg-gray-200 text-gray-700 rounded-t-lg font-semibold hover:bg-gray-300 transition"
+          data-tab="payment">
+          💳 Payment
+        </button>
+        <button
+          class="tab-btn px-6 py-3 cursor-pointer bg-gray-200 text-gray-700 rounded-t-lg font-semibold hover:bg-gray-300 transition"
+          data-tab="return">
+          ↩️ Return
+        </button>
+      </div>
+      <button id="addPolicyBtn"
+        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+        ➕ New Policy
+      </button>
+    </div>
+
+    <!-- Policy Stats -->
+    <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <h3 class="text-lg font-semibold text-blue-900 mb-2">📊 Policy Summary</h3>
+      <div class="grid grid-cols-3 gap-4 text-sm">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600" id="fulfillment-count">-</div>
+          <div class="text-blue-800">Shipping Policy</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600" id="payment-count">-</div>
+          <div class="text-blue-800">Payment Policy</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-blue-600" id="return-count">-</div>
+          <div class="text-blue-800">Return Policy</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="fulfillment" class="tab-content block border border-gray-300 p-6 rounded-b-lg rounded-tr-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800">🚚 Shipping Policies</h2>
+        <span class="text-sm text-gray-600" id="fulfillment-status">Loading...</span>
+      </div>
+      <div id="fulfillment-list" class="space-y-4">
+        <div class="text-center text-gray-600 py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          Loading policies...
+        </div>
+      </div>
+    </div>
+
+    <div id="payment" class="tab-content hidden border border-gray-300 p-6 rounded-b-lg rounded-tr-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800">💳 Payment Policies</h2>
+        <span class="text-sm text-gray-600" id="payment-status">Loading...</span>
+      </div>
+      <div id="payment-list" class="space-y-4">
+        <div class="text-center text-gray-600 py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          Loading policies...
+        </div>
+      </div>
+    </div>
+
+    <div id="return" class="tab-content hidden border border-gray-300 p-6 rounded-b-lg rounded-tr-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-gray-800">↩️ Return Policies</h2>
+        <span class="text-sm text-gray-600" id="return-status">Loading...</span>
+      </div>
+      <div id="return-list" class="space-y-4">
+        <div class="text-center text-gray-600 py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          Loading policies...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Edit Modal -->
+  <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Edit Policy</h2>
+          <span class="close text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <div id="policy-info" class="bg-gray-50 p-4 rounded-lg mb-6">
+          <h3 class="font-semibold text-gray-700 mb-2">Policy Information</h3>
+          <div class="text-sm text-gray-600">
+            <p><strong>Type:</strong> <span id="policy-type-label">-</span></p>
+            <p><strong>ID:</strong> <span id="policy-id-label">-</span></p>
+          </div>
+        </div>
+
+        <input type="hidden" id="edit-id">
+        <input type="hidden" id="edit-type">
+
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Policy JSON Payload *</label>
+          <textarea id="edit-policy-payload" rows="20"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+            placeholder='Policy JSON payload'></textarea>
+          <p class="text-xs text-gray-500 mt-1">Edit policy payload in valid JSON format</p>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition cancel-btn">
+            Cancel
+          </button>
+          <button type="button" id="edit-policy-submit-btn"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+            💾 Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Policy Modal -->
+  <div id="create-policy-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Create New Policy</h2>
+          <span
+            class="close-create-policy text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Policy Type *</label>
+          <select id="new-policy-type"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="fulfillment">Shipping (Fulfillment)</option>
+            <option value="payment">Payment</option>
+            <option value="return">Return</option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Policy JSON Payload *</label>
+          <textarea id="new-policy-payload" rows="15"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+            placeholder='{
+  "name": "Policy Name",
+  "description": "Policy description",
+  "marketplaceId": "EBAY_AU",
+  "categoryTypes": [
+    {
+      "name": "ALL_EXCLUDING_MOTORS_VEHICLES"
+    }
+  ]
+  // Add other policy-specific fields here...
+}'></textarea>
+          <p class="text-xs text-gray-500 mt-1">Paste policy payload in valid JSON format here</p>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" id="cancel-create-policy-btn"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+            Cancel
+          </button>
+          <button type="submit" id="create-policy-submit-btn"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+            Create Policy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy Details Modal -->
+  <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Policy Details</h2>
+          <span class="close-details text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+        <div id="policy-details-content">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      let policiesData = {};
+
+      // Tab Switching
+      $('.tab-btn').click(function () {
+        $('.tab-btn').removeClass('bg-blue-600 text-white').addClass('bg-gray-200 text-gray-700');
+        $('.tab-content').removeClass('block').addClass('hidden');
+        $(this).removeClass('bg-gray-200 text-gray-700').addClass('bg-blue-600 text-white');
+        $('#' + $(this).data('tab')).removeClass('hidden').addClass('block');
+      });
+
+      // Load Policies
+      loadPolicies();
+
+      function loadPolicies() {
+        $.getJSON('/api/ebay-policies', function (data) {
+          policiesData = data;
+          updateStats(data);
+          renderPolicies('fulfillment', data.fulfillment);
+          renderPolicies('payment', data.payment);
+          renderPolicies('return', data.return);
+        }).fail(function (xhr) {
+          showError('Policies could not be loaded. Check your eBay connection.');
+          $('.tab-content').html('<p class="text-red-600 text-center py-8">Policies could not be loaded.</p>');
+        });
+      }
+
+      function updateStats(data) {
+        $('#fulfillment-count').text(data.fulfillment?.length || 0);
+        $('#payment-count').text(data.payment?.length || 0);
+        $('#return-count').text(data.return?.length || 0);
+      }
+
+      function renderPolicies(type, policies) {
+        const container = $(`#${type}-list`);
+        const statusEl = $(`#${type}-status`);
+
+        container.empty();
+
+        if (!policies || policies.length === 0) {
+          statusEl.text('No policies found');
+          container.html(`
+            <div class="text-center py-12">
+              <div class="text-gray-400 mb-4">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <p class="text-gray-500 mb-4">No ${getPolicyTypeName(type)} created yet</p>
+              <button onclick="openCreatePolicy('${type}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                Create First Policy
+              </button>
+            </div>
+          `);
+          return;
+        }
+
+        statusEl.text(`${policies.length} policies found`);
+
+        policies.forEach((policy, index) => {
+          const id = getPolicyId(policy, type);
+
+          // Debug: Log policy structure for first item of each type
+          if (index === 0) {
+            console.log(`Debug - ${type} policy structure:`, JSON.stringify(policy, null, 2));
+            console.log(`Debug - ${type} policy ID extracted:`, id);
+          }
+
+          const details = getPolicyDetails(policy, type);
+
+          const html = `
+            <div class="border border-gray-200 p-6 rounded-lg hover:shadow-md transition bg-white">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex-1">
+                  <h3 class="text-xl font-semibold text-gray-800 mb-2">${escapeHtml(policy.name)}</h3>
+                  <p class="text-gray-600 mb-3">${policy.description || 'No description'}</p>
+                  <div class="text-sm text-gray-500">
+                    <span>📋 ID: ${id}</span>
+                  </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                  <button onclick="showPolicyDetails('${type}', '${id}')"
+                          class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                    📋 Details
+                  </button>
+                  <button onclick="editPolicy('${type}', '${id}')"
+                          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                    ✏️ Edit
+                  </button>
+                  <button onclick="deletePolicy('${type}', '${id}', '${policy.name}')"
+                          class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          container.append(html);
+        });
+      }
+
+      function getPolicyId(policy, type) {
+        switch (type) {
+          case 'fulfillment':
+            return policy.fulfillmentPolicyId || policy.fulfillmentpolicyId || 'N/A';
+          case 'payment':
+            return policy.paymentPolicyId || policy.paymentpolicyId || 'N/A';
+          case 'return':
+            return policy.returnPolicyId || policy.returnpolicyId || 'N/A';
+          default:
+            return 'N/A';
+        }
+      }
+
+      function getPolicyDetails(policy, type) {
+        switch (type) {
+          case 'fulfillment':
+            return `
+              <p><strong>Shipping Options:</strong> ${policy.fulfillmentInstructions?.shipToLocationOptions?.length || 0} items</p>
+              <p><strong>Processing Time:</strong> ${policy.fulfillmentInstructions?.handlingTime?.value || 'Not specified'} ${policy.fulfillmentInstructions?.handlingTime?.unit || ''}</p>
+            `;
+          case 'payment':
+            const methods = policy.paymentInstructions?.paymentMethods || [];
+            return `
+              <p><strong>Payment Methods:</strong> ${methods.map(m => m.paymentMethodType).join(', ') || 'Not specified'}</p>
+              <p><strong>Installment:</strong> ${policy.paymentInstructions?.installmentOption?.installmentCount ? policy.paymentInstructions.installmentOption.installmentCount + ' months' : 'None'}</p>
+            `;
+          case 'return':
+            return `
+              <p><strong>Return Period:</strong> ${policy.returnPolicyDetails?.returnPeriod?.value || 'Not specified'} ${policy.returnPolicyDetails?.returnPeriod?.unit || ''}</p>
+              <p><strong>Refund Method:</strong> ${policy.returnPolicyDetails?.refundMethod || 'Not specified'}</p>
+            `;
+          default:
+            return '';
+        }
+      }
+
+      function getPolicyTypeName(type) {
+        const names = {
+          'fulfillment': 'Shipping',
+          'payment': 'Payment',
+          'return': 'Return'
+        };
+        return names[type] || type;
+      }
+
+      function formatDate(dateString) {
+        if (!dateString) return null;
+        return new Date(dateString).toLocaleDateString('tr-TR');
+      }
+
+      function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Edit Policy
+      window.editPolicy = function (type, id) {
+        const policies = policiesData[type] || [];
+        const policy = policies.find(p => getPolicyId(p, type) === id);
+
+        if (!policy) return;
+
+        $('#edit-id').val(id);
+        $('#edit-type').val(type);
+        $('#policy-type-label').text(getPolicyTypeName(type));
+        $('#policy-id-label').text(id);
+
+        // Fill textarea with current policy JSON
+        $('#edit-policy-payload').val(JSON.stringify(policy, null, 2));
+
+        $('#edit-modal').removeClass('hidden');
+      };
+
+
+      // Show Policy Details
+      window.showPolicyDetails = function (type, id) {
+        const policies = policiesData[type] || [];
+        const policy = policies.find(p => getPolicyId(p, type) === id);
+
+        if (!policy) return;
+
+        const detailsHtml = renderPolicyDetailsContent(type, policy);
+        $('#policy-details-content').html(detailsHtml);
+        $('#details-modal').removeClass('hidden');
+      };
+
+      function renderPolicyDetailsContent(type, policy) {
+        const id = getPolicyId(policy, type);
+
+        return `
+          <div class="space-y-6">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-3">Basic Information</h3>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="font-medium">Policy Name:</span>
+                  <p>${escapeHtml(policy.name || 'Not specified')}</p>
+                </div>
+                <div>
+                  <span class="font-medium">Policy ID:</span>
+                  <p>${id}</p>
+                </div>
+                <div>
+                  <span class="font-medium">Description:</span>
+                  <p>${escapeHtml(policy.description || 'None')}</p>
+                </div>
+                <div>
+                  <span class="font-medium">Last Update:</span>
+                  <p>${formatDate(policy.modifiedTime) || 'Unknown'}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-3">Detailed Configuration</h3>
+              <pre class="text-xs bg-gray-100 p-3 rounded overflow-auto">${JSON.stringify(policy, null, 2)}</pre>
+            </div>
+          </div>
+        `;
+      }
+
+      // Delete Policy
+      window.deletePolicy = function (type, id, name) {
+        console.log(`Deleting ${type} policy:`, { id, name, type: typeof id });
+
+        if (id === 'N/A' || !id) {
+          showError('Invalid policy ID. Please refresh the page.');
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to delete "${name}" policy?`)) {
+          return;
+        }
+
+        $.ajax({
+          url: `/api/ebay-policies/${type}/${id}`,
+          method: 'DELETE',
+          success: function (response) {
+            showSuccess(response.message || 'Policy deleted successfully!');
+            loadPolicies();
+          },
+          error: function (xhr) {
+            console.error('Delete error:', xhr.responseJSON);
+            showError('Delete failed: ' + (xhr.responseJSON?.error || 'Unknown error'));
+          }
+        });
+      };
+
+      // Create Policy
+      window.openCreatePolicy = function (type) {
+        alert(`To create a "${getPolicyTypeName(type)}" policy:\n\n1. Go to eBay Developer Console\n2. Manually create from Account > Policies section\n3. You can edit and delete via this application\n\nNote: Automatic creation feature is not available because eBay Policy APIs require very complex configurations.`);
+      };
+
+      // Edit Policy Submit
+      $('#edit-policy-submit-btn').click(function () {
+        const id = $('#edit-id').val();
+        const type = $('#edit-type').val();
+        const payloadText = $('#edit-policy-payload').val().trim();
+
+        if (!payloadText) {
+          showError('Policy JSON payload is required!');
+          return;
+        }
+
+        let payload;
+        try {
+          payload = JSON.parse(payloadText);
+        } catch (e) {
+          showError('Invalid JSON format! Please check.');
+          return;
+        }
+
+        // Validate basic structure
+        if (!payload.name) {
+          showError('Policy name field is required!');
+          return;
+        }
+
+        // Show loading
+        $('#edit-policy-submit-btn').prop('disabled', true).text('Updating...');
+
+        $.ajax({
+          url: `/api/ebay-policies/${type}/${id}`,
+          method: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function () {
+            $('#edit-policy-submit-btn').prop('disabled', false).text('💾 Save');
+            showSuccess('Policy updated successfully!');
+            $('#edit-modal').addClass('hidden');
+            loadPolicies();
+          },
+          error: function (xhr) {
+            $('#edit-policy-submit-btn').prop('disabled', false).text('💾 Save');
+            showError('Update failed: ' + (xhr.responseJSON?.error || 'Unknown error'));
+            console.error('Edit policy error:', xhr.responseJSON);
+          }
+        });
+      });
+
+      // Modal Controls
+      $('.close, .cancel-btn').click(function () {
+        $(this).closest('.fixed').addClass('hidden');
+      });
+
+      $('.close-details').click(function () {
+        $('#details-modal').addClass('hidden');
+      });
+
+      // New Policy Button
+      $('#addPolicyBtn').click(function () {
+        openCreatePolicyModal();
+      });
+
+      // Create Policy Functions
+      window.openCreatePolicyModal = function () {
+        $('#new-policy-type').val('fulfillment');
+        $('#new-policy-payload').val('');
+        $('#create-policy-modal').removeClass('hidden');
+      };
+
+      window.closeCreatePolicyModal = function () {
+        $('#create-policy-modal').addClass('hidden');
+      };
+
+      // Create Policy Submit
+      $('#create-policy-submit-btn').click(function () {
+        createPolicy();
+      });
+
+      // Modal Controls for Create Policy
+      $('.close-create-policy, #cancel-create-policy-btn').click(function () {
+        $('#create-policy-modal').addClass('hidden');
+      });
+
+      function createPolicy() {
+        const type = $('#new-policy-type').val();
+        const payloadText = $('#new-policy-payload').val().trim();
+
+        if (!payloadText) {
+          showError('Policy JSON payload is required!');
+          return;
+        }
+
+        let payload;
+        try {
+          payload = JSON.parse(payloadText);
+        } catch (e) {
+          showError('Invalid JSON format! Please check.');
+          return;
+        }
+
+        // Validate basic structure
+        if (!payload.name) {
+          showError('Policy name field is required!');
+          return;
+        }
+
+        // Show loading
+        $('#create-policy-submit-btn').prop('disabled', true).text('Creating...');
+
+        $.ajax({
+          url: `/api/ebay-policies/${type}`,
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (response) {
+            $('#create-policy-submit-btn').prop('disabled', false).text('Create Policy');
+            $('#create-policy-modal').addClass('hidden');
+            showSuccess('Policy created successfully!');
+            loadPolicies();
+          },
+          error: function (xhr) {
+            $('#create-policy-submit-btn').prop('disabled', false).text('Create Policy');
+            showError('Policy creation failed: ' + (xhr.responseJSON?.error || 'Unknown error'));
+            console.error('Create policy error:', xhr.responseJSON);
+          }
+        });
+      }
+
+      // Utility Functions
+      function showSuccess(message) {
+        // Create a simple success notification
+        const notification = $(`
+          <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            ✓ ${message}
+          </div>
+        `);
+        $('body').append(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+
+      function showError(message) {
+        const notification = $(`
+          <div class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            ✗ ${message}
+          </div>
+        `);
+        $('body').append(notification);
+        setTimeout(() => notification.remove(), 5000);
+      }
+
+      function showInfo(message) {
+        const notification = $(`
+          <div class="fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            ℹ️ ${message}
+          </div>
+        `);
+        $('body').append(notification);
+        setTimeout(() => notification.remove(), 4000);
+      }
+    });
+  </script>
+</body>
+
+</html>

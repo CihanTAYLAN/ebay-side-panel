@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management - eBay Side Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto max-w-7xl mt-8 bg-white p-6 rounded-lg shadow-lg">
+    <header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+      <h1 class="text-3xl font-bold text-blue-600">Product Management</h1>
+      <nav class="flex gap-3">
+        <a href="/products.html" class="bg-blue-600 text-white px-3 py-2 rounded">Products</a>
+        <a href="/categories.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Categories</a>
+        <a href="/policies.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Policies</a>
+        <a href="/orders.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Orders</a>
+        <a href="/" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Logout</a>
+      </nav>
+    </header>
+
+    <div class="mb-6 flex justify-between items-center">
+      <div class="text-sm text-gray-600">
+        <span id="productCount">0</span> products found
+      </div>
+      <button id="addProductBtn"
+        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+        + New Product
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table id="productsTable" class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">SKU</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Image</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Title</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Price</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Category</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">eBay Status</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsTableBody">
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500 italic">Loading products...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Product Form Modal -->
+  <div id="productModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">New Product</h2>
+          <span class="close text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <form id="productForm">
+          <input type="hidden" id="productId" />
+
+          <div class="mb-4">
+            <label for="productSku" class="block text-sm font-semibold text-gray-700 mb-2">SKU *</label>
+            <input type="text" id="productSku" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <p class="text-xs text-gray-500 mt-1">Unique product code</p>
+          </div>
+
+          <div class="mb-4">
+            <label for="productTitle" class="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
+            <input type="text" id="productTitle" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div class="mb-4">
+            <label for="productPrice" class="block text-sm font-semibold text-gray-700 mb-2">Price *</label>
+            <input type="number" id="productPrice" step="0.01" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div class="mb-4">
+            <label for="productDescription" class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea id="productDescription" rows="4"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label for="productImageUrl" class="block text-sm font-semibold text-gray-700 mb-2">Image URL</label>
+            <input type="url" id="productImageUrl" placeholder="https://example.com/image.jpg"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <p class="text-xs text-gray-500 mt-1">Product image URL for eBay (optional)</p>
+          </div>
+
+          <div class="mb-4">
+            <label for="productCategory" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+            <select id="productCategory"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">-- Select Category --</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Category selection is recommended for sending to eBay</p>
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button type="button" id="cancelBtn"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+              Cancel
+            </button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send to eBay Modal -->
+  <div id="ebayModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-800">Send Product to eBay</h2>
+          <span class="close text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <div id="ebayProductDetails" class="space-y-4 mb-6">
+          <!-- Product details will be here -->
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" id="cancelEbayBtn"
+            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition">
+            Close
+          </button>
+          <button type="button" id="sendToEbayBtn"
+            class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition">
+            ⚠️ Not Available Yet
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="ebayLoading" class="hidden mt-4 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p class="text-gray-600 mt-2">Sending to eBay...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/session.js"></script>
+  <script src="/js/products.js"></script>
+  <script src="/js/ebay-listing.js"></script>
+</body>
+
+</html>

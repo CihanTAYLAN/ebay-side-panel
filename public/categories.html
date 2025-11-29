@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Category Management - eBay Side Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto max-w-7xl mt-8 bg-white p-6 rounded-lg shadow-lg">
+    <header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+      <h1 class="text-3xl font-bold text-blue-600">Category Management</h1>
+      <nav class="flex gap-3">
+        <a href="/products.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Products</a>
+        <a href="/categories.html" class="bg-blue-600 text-white px-3 py-2 rounded">Categories</a>
+        <a href="/policies.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Policies</a>
+        <a href="/orders.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Orders</a>
+        <a href="/" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Logout</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="flex justify-between items-center mb-6 gap-4">
+        <div class="flex-1 relative">
+          <input type="text" id="ebaySearchInput" placeholder="Search category on eBay..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div id="ebaySearchResults"
+            class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-lg max-h-96 overflow-y-auto shadow-lg z-50">
+          </div>
+        </div>
+        <button id="addCategoryBtn"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition whitespace-nowrap">
+          + New Category
+        </button>
+      </div>
+
+      <div class="mt-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Saved Categories</h2>
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-600">
+            <strong>Tip:</strong> Subcategories are shown indented. Use the search box above to search for categories
+            from eBay.
+          </p>
+        </div>
+        <div class="overflow-x-auto">
+          <table id="categoriesTable" class="w-full border-collapse">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Category Name</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">eBay ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="categoriesTableBody">
+              <tr>
+                <td colspan="3" class="px-4 py-8 text-center text-gray-500 italic">Loading categories...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Category Form Modal -->
+  <div id="categoryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">New Category</h2>
+          <span class="close text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <form id="categoryForm">
+          <input type="hidden" id="categoryId" />
+
+          <div class="mb-4">
+            <label for="categoryName" class="block text-sm font-semibold text-gray-700 mb-2">Category Name *</label>
+            <input type="text" id="categoryName" required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div class="mb-4">
+            <label for="parentCategory" class="block text-sm font-semibold text-gray-700 mb-2">Parent Category</label>
+            <select id="parentCategory"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">-- Main Category (No Parent) --</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">If you don't select a parent category, it will be added as a main
+              category</p>
+          </div>
+
+          <div class="mb-4">
+            <label for="ebaySearchModal" class="block text-sm font-semibold text-gray-700 mb-2">Link eBay
+              Category</label>
+            <div class="relative">
+              <input type="text" id="ebaySearchModal" placeholder="Search category on eBay..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <div id="ebaySearchModalResults"
+                class="hidden absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-lg max-h-60 overflow-y-auto shadow-lg z-50">
+              </div>
+            </div>
+            <div id="selectedEbayCategory" class="hidden mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="text-sm font-semibold text-blue-900" id="selectedEbayCategoryName"></div>
+                  <div class="text-xs text-blue-700" id="selectedEbayCategoryId"></div>
+                </div>
+                <button type="button" id="clearEbayCategory" class="text-red-600 hover:text-red-800 text-sm">✕
+                  Remove</button>
+              </div>
+            </div>
+            <input type="hidden" id="ebayCategoryId" />
+          </div>
+
+          <div class="mb-4">
+            <label for="categoryPath" class="block text-sm font-semibold text-gray-700 mb-2">Category Path
+              (Auto)</label>
+            <input type="text" id="categoryPath" readonly
+              class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
+              placeholder="Auto-generated when parent category is selected" />
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button type="button" id="cancelBtn"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+              Cancel
+            </button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/session.js"></script>
+  <script src="/js/categories.js"></script>
+</body>
+
+</html>

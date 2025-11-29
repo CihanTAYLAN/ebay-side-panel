@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management - eBay Side Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto max-w-7xl mt-8 bg-white p-6 rounded-lg shadow-lg">
+    <header class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+      <h1 class="text-3xl font-bold text-blue-600">Order Management</h1>
+      <nav class="flex gap-3">
+        <a href="/products.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Products</a>
+        <a href="/categories.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Categories</a>
+        <a href="/policies.html" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Policies</a>
+        <a href="/orders.html" class="bg-blue-600 text-white px-3 py-2 rounded">Orders</a>
+        <a href="/" class="text-gray-600 hover:bg-gray-100 px-3 py-2 rounded transition">Logout</a>
+      </nav>
+    </header>
+
+    <div class="mb-6 flex justify-between items-center">
+      <div class="text-sm text-gray-600">
+        <span id="orderCount">0</span> orders found (Last 90 days)
+      </div>
+      <button id="refreshOrdersBtn"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+        <i class="fas fa-sync-alt mr-2"></i> Refresh
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table id="ordersTable" class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Order ID</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Date</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Buyer</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Amount</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Status</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-gray-500 italic">Loading orders...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div id="orderModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Order Details</h2>
+          <span class="close-modal text-gray-400 hover:text-gray-600 text-3xl font-bold cursor-pointer">&times;</span>
+        </div>
+
+        <div id="modalContent" class="space-y-6">
+          <!-- Loading State -->
+          <div class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading details...</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
+          <button type="button"
+            class="close-modal bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/session.js"></script>
+  <script src="/js/orders.js"></script>
+</body>
+
+</html>
